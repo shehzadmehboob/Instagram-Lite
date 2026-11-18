@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>
+        <%= profileUser.username %> - Instagram-Lite
+    </title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="/" class="logo">Instagram-Lite</a>
+            <div class="nav-links">
+                <a href="/">Feed</a>
+                <% if (userId) { %>
+                    <a href="/posts/new">New Post</a>
+                    <a href="/logout">Logout</a>
+                    <% } else { %>
+                        <a href="/login">Login</a>
+                        <a href="/signup">Sign Up</a>
+                        <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div style="display: flex; align-items: center; gap: 28px; margin-bottom: 36px;">
+            <img src="<%= profileUser.avatar_url %>" alt="<%= profileUser.username %>"
+                style="width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+            <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 10px;">
+                    <h1 style="font-size: 24px; font-weight: 600;">
+                        <%= profileUser.username %>
+                    </h1>
+
+                    <% if (userId===profileUser.id) { %>
+                        <a href="/profile/edit" class="action-btn">Edit Profile</a>
+                        <% } else if (userId) { %>
+                            <form action="/users/<%= profileUser.username %>/follow" method="POST">
+                                <button type="submit" class="submit-btn" style="padding: 6px 14px; font-size: 12px;">
+                                    <% if (followStatus==='accepted' ) { %>
+                                        Unfollow
+                                        <% } else if (followStatus==='pending' ) { %>
+                                            Requested
+                                            <% } else { %>
+                                                Follow
+                                                <% } %>
+                                </button>
+                            </form>
+                            <% } %>
+                </div>
+
+                <div style="display: flex; gap: 20px; font-size: 13px; margin-bottom: 10px;">
+                    <span><strong>
+                            <%= posts.length %>
+                        </strong> posts</span>
+                    <a href="/profile/<%= profileUser.username %>/followers"><strong>
+                            <%= followerCount %>
+                        </strong> followers</a>
+                    <a href="/profile/<%= profileUser.username %>/following"><strong>
+                            <%= followingCount %>
+                        </strong> following</a>
+                </div>
+
+                <% if (profileUser.bio) { %>
+                    <p style="font-size: 13px; color: #555; max-width: 500px;">
+                        <%= profileUser.bio %>
+                    </p>
+                    <% } %>
+            </div>
+        </div>
+
+        <div class="notes-list" style="padding-top: 28px;">
+            <% const canViewPosts=!profileUser.is_private || userId===profileUser.id || followStatus==='accepted' ; %>
+
+                <% if (!canViewPosts) { %>
+                    <div class="empty">This account is private. Follow to see their photos.</div>
+                    <% } else if (posts.length===0) { %>
+                        <div class="empty">No posts yet.</div>
+                        <% } else { %>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                                <% posts.forEach(post=> { %>
+                                    <a href="/posts/<%= post.id %>"
+                                        style="display: block; aspect-ratio: 1 / 1; background: #eee; border-radius: 6px; overflow: hidden;">
+                                        <img src="<%= post.image_url %>" alt="Post"
+                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                    </a>
+                                    <% }) %>
+                            </div>
+                            <% } %>
+        </div>
+    </main>
+</body>
+
+</html>
